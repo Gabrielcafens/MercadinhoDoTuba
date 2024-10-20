@@ -11,7 +11,9 @@ interface Produto {
   id: string;
   nome: string;
   categoria_id: string;
+  unidade: string; 
 }
+
 
 interface Categoria {
   id: string;
@@ -87,15 +89,20 @@ const ShoppingList = () => {
     }
   };
 
-  const handleQuantityChange = (produtoId: string, quantity: number) => {
-    console.log(`Quantity changed for productId: ${produtoId} to ${quantity}`);
-    if (clienteSelecionado) {
-      handleProductSelect(produtoId, quantity);
-    }
+  const resetShoppingList = () => {
+    setCart([]);
+    setClienteSelecionado(null); 
+    setSelectedCategory("");
+    setSearchTerm("");
   };
 
   const handleCheckboxChange = (produtoId: string, isChecked: boolean) => {
     console.log(`Checkbox changed for productId: ${produtoId} to ${isChecked}`);
+    if (!clienteSelecionado) {
+      console.error("Cliente não selecionado. A checkbox não pode ser marcada.");
+      return;
+    }
+  
     if (isChecked) {
       handleProductSelect(produtoId, 1);
     } else {
@@ -108,12 +115,13 @@ const ShoppingList = () => {
       (selectedCategory === "" || categorias.find(c => c.id === produto.categoria_id)?.nome === selectedCategory) &&
       (searchTerm === "" || produto.nome.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
   const handleSubmit = async () => {
     if (!clienteSelecionado || cart.length === 0) {
       console.error("Cliente não selecionado ou carrinho vazio.");
       return;
     }
-
+  
     const pedido = {
       cliente_id: clienteSelecionado.id,
       data_pedido: new Date().toISOString().split("T")[0],
@@ -188,6 +196,11 @@ const ShoppingList = () => {
       }
   
       console.log("Pedido e itens registrados com sucesso");
+      
+      fetchProdutos();
+      fetchCategorias();
+      fetchEstoques();
+      resetShoppingList();
     } catch (error) {
       console.error("Erro ao enviar pedido:", error);
     }
@@ -196,18 +209,17 @@ const ShoppingList = () => {
   console.log("Filtered products:", filteredProdutos);
 
   return (
-    <div className="w-full p-6">
-      <h1 className="text-4xl font-bold text-center mb-4">Lista de Compras</h1>
+    <div className="w-full p-4 bg-primary-1 ">
+      <h1 className="text-4xl font-bold text-center mb-4 text-primary-6">Lista de Compras</h1>
 
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold">Confirme o Cliente</h2>
+      <div >
+        <h2 className="text-2xl mb-4 font-bold text-primary-5">Selecione o Cliente</h2>
         <ClienteCombobox onSelect={(cliente: { id: string; nome: string }) => {
           console.log("Cliente selecionado:", cliente);
           setClienteSelecionado(cliente);
         }} />
       </div>
-
-      <div className="flex justify-between mb-4">
+      <div className="flex justify-between mt-4 bg-primary-1">
         <input
           type="text"
           placeholder="Buscar produto..."
@@ -216,91 +228,67 @@ const ShoppingList = () => {
             setSearchTerm(e.target.value);
             console.log("Search term updated:", e.target.value);
           }}
-          className="border border-neutral-1 p-2 rounded bg-neutral-0 text-neutral-1"
-        />
+          className="border-primary-6 p-2  bg-neutral-0 text-neutral-1"
+          />
         <select
-          value={selectedCategory}
-          onChange={(e) => {
-            setSelectedCategory(e.target.value);
-            console.log("Category selected:", e.target.value);
-          }}
-          className="border border-neutral-1 p-2 rounded bg-neutral-0 text-neutral-1"
-        >
-          <option value="">Todas as categorias</option>
-          {categorias.map((categoria) => (
-            <option key={categoria.id} value={categoria.nome}>
-              {categoria.nome}
-            </option>
-          ))}
-        </select>
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              console.log("Category selected:", e.target.value);
+            }}
+            >
+            <option value="">Todas as categorias</option>
+            {categorias.map((categoria) => (
+              <option key={categoria.id} value={categoria.nome}>
+                {categoria.nome}
+              </option>
+            ))}
+          </select>
+
       </div>
 
-      <Table className="bg-neutral-0">
+      <Table className="bg-primary-1">
         <TableHeader>
           <TableRow>
-            <th className="text-left"></th>
-            <th className="text-left">Produto</th>
-            <th className="text-left">Quantidade em Estoque</th>
-            <th className="text-left">Quantidade</th>
+            <th className="text-left py-2 px-1"></th>
+            <th className="text-left py-2 px-1">Produto</th>
+            <th className="text-left py-2 px-1">Unidade</th>
+            <th className="text-left py-2 px-1">Categoria</th>
+            <th className="text-left py-2 px-1">Quantidade em Estoque</th>
           </TableRow>
         </TableHeader>
         <TableBody>
           {filteredProdutos.length > 0 ? (
             filteredProdutos.map((produto) => {
               const estoque = estoques.find((e) => e.produto_id === produto.id);
+              const categoria = categorias.find(c => c.id === produto.categoria_id);
               return (
                 <TableRow key={produto.id}>
-                  <TableCell className="text-left">
-                    <label className="custom-checkbox">
-                      <Checkbox
-                        disabled={!clienteSelecionado}
-                        onCheckedChange={(checked) => handleCheckboxChange(produto.id, checked as boolean)}
-                        style={{
-                          backgroundColor: clienteSelecionado ? (cart.some(item => item.productId === produto.id) ? 'var(--color-primary-6)' : 'var(--color-primary-1)') : 'var(--color-neutral-1)',
-                          borderColor: clienteSelecionado ? (cart.some(item => item.productId === produto.id) ? 'var(--color-primary-6)' : 'var(--color-neutral-1)') : 'var(--color-neutral-1)',
-                          color: clienteSelecionado && cart.some(item => item.productId === produto.id) ? '#ffffff' : 'transparent',
-                          transition: 'background-color 0.3s, border-color 0.3s',
-                        }}
-                        onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-                          if (!clienteSelecionado) {
-                            (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'var(--color-primary-1)';
-                          }
-                        }}
-                        onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-                          if (!clienteSelecionado) {
-                            (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
-                          }
-                        }}
-                      />
-                    </label>
-                  </TableCell>
-                  <TableCell className="text-left">{produto.nome}</TableCell>
-                  <TableCell className="text-left">{estoque ? estoque.quantidade_atual : 0}</TableCell>
-                  <TableCell className="text-left">
-                    <input
-                      type="number"
-                      min={1}
-                      max={estoque ? estoque.quantidade_atual : 0}
-                      onChange={(e) => handleQuantityChange(produto.id, Number(e.target.value))}
+                  <TableCell className="py-2 px-1">
+                  <Checkbox
+                      onCheckedChange={(isChecked) => handleCheckboxChange(produto.id, typeof isChecked === 'boolean' ? isChecked : false)}
                       disabled={!clienteSelecionado}
-                      className="border border-neutral-1 p-1 rounded w-20"
                     />
                   </TableCell>
+                  <TableCell className="py-2 px-1">{produto.nome}</TableCell>
+                  <TableCell className="py-2 px-1">{produto.unidade}</TableCell>
+                  <TableCell className="py-2 px-1">{categoria?.nome || "Sem categoria"}</TableCell>
+                  <TableCell className="py-2 px-1">{estoque ? estoque.quantidade_atual : 0}</TableCell>
                 </TableRow>
               );
             })
           ) : (
             <TableRow>
-              <TableCell colSpan={4} className="text-center">Nenhum produto encontrado</TableCell>
+              <TableCell colSpan={5} className="text-center py-4">
+                Nenhum produto encontrado.
+              </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
 
-      {clienteSelecionado && cart.length > 0 && (
-        <div className="mt-4">
-          <h2 className="text-2xl font-bold">Carrinho</h2>
-          <Cart 
+      <div className="flex justify-between mt-6">
+        <Cart 
             cart={cart} 
             clienteSelecionado={clienteSelecionado} 
             produtos={produtos} 
@@ -308,8 +296,7 @@ const ShoppingList = () => {
             onCancel={() => {/*TODO lógica para cancelar */}} 
             onUpdateCart={setCart} 
           />
-        </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -18,12 +18,12 @@ const Header = ({ title = "Mercadinho do Tuba" }: HeaderProps) => {
           <ul className="flex gap-12">
             <li className="nav-item">
               <Button variant="link" asChild>
-                <Link href="#produtos" className="text-neutral-1 hover:text-primary-6">Produtos</Link>
+                <Link href="/produtos" className="text-neutral-1 hover:text-primary-6">Produtos</Link>
               </Button>
             </li>
             <li className="nav-item">
               <Button variant="link" asChild>
-                <Link href="#clientes" className="text-neutral-1 hover:text-primary-6">Clientes</Link>
+                <Link href="/clientes" className="text-neutral-1 hover:text-primary-6">Clientes</Link>
               </Button>
             </li>
             <li className="nav-item">

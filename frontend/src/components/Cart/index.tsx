@@ -19,10 +19,16 @@ interface CartItem {
   productId: string;
   quantity: number;
 }
+interface Produto {
+  id: string;
+  nome: string;
+  categoria_id: string;
+  unidade: string;
+}
 
 interface CartProps {
   cart: CartItem[];
-  produtos: { id: string; nome: string }[];
+  produtos: Produto[];
   clienteSelecionado: { id: string; nome: string } | null;
   onSubmit: () => void;
   onCancel: () => void;
@@ -34,10 +40,13 @@ const Cart = ({ cart, produtos, clienteSelecionado, onSubmit, onCancel, onUpdate
     const resumo = cart
       .map((item) => {
         const produto = produtos.find((p) => p.id === item.productId);
-        return `${produto ? produto.nome : 'Produto Desconhecido'} - Quantidade: ${item.quantity}`;
+        const unidadePlural = item.quantity > 1 ? `${produto?.unidade}s` : produto?.unidade;
+        return produto 
+          ? `${produto.nome} - Quantidade: ${item.quantity} ${unidadePlural}` 
+          : 'Produto Desconhecido';
       })
       .join("\n");
-
+  
     return resumo;
   };
 
@@ -60,6 +69,7 @@ const Cart = ({ cart, produtos, clienteSelecionado, onSubmit, onCancel, onUpdate
             <TableRow>
               <th className="text-left">Produto</th>
               <th className="text-left">Quantidade</th>
+              <th className="text-left">Unidade</th>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -78,6 +88,9 @@ const Cart = ({ cart, produtos, clienteSelecionado, onSubmit, onCancel, onUpdate
                       onChange={(e) => handleQuantityChange(item.productId, Number(e.target.value))}
                       className="border border-neutral-1 p-1 rounded w-20"
                     />
+                  </TableCell>
+                  <TableCell className="text-left"> 
+                    {produto ? produto.unidade : 'N/A'}
                   </TableCell>
                 </TableRow>
               );
@@ -99,7 +112,7 @@ const Cart = ({ cart, produtos, clienteSelecionado, onSubmit, onCancel, onUpdate
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-primary-6">Resumo do Pedido</AlertDialogTitle>
                 <AlertDialogDescription>
-                <strong>Cliente:</strong> {clienteSelecionado.nome}
+                  <strong>Cliente:</strong> {clienteSelecionado.nome}
                   <br />
                   <strong>Itens:</strong>
                   <div className="whitespace-pre-wrap">{gerarResumoPedido()}</div>
