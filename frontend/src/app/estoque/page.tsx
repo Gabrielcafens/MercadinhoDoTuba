@@ -1,4 +1,4 @@
-'use client';
+/*'use client';
 
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
@@ -284,4 +284,4 @@ const EstoquePage = () => {
   );
 };
 
-export default EstoquePage;
+export default EstoquePage;*/

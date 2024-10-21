@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { TrashIcon, Pencil1Icon, ChevronUpIcon, ChevronDownIcon } from '@radix-ui/react-icons';
-import { Dialog, DialogContent, DialogHeader, DialogTrigger, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Pagination from '@/components/Pagination';
@@ -59,7 +59,7 @@ const ClientesPage = () => {
     const sortedClientes = ordenarClientes(field, newDirection);
     setClientes(sortedClientes);
   };
-  const handleFormSubmit = async (data: z.infer<typeof formSchema> & { id?: number }) => {
+  /*const handleFormSubmit = async (data: z.infer<typeof formSchema> & { id?: number }) => {
   if (data.id) {
     if (data.id !== undefined) {
       await updateCliente(data as z.infer<typeof formSchema> & { id: number });
@@ -67,7 +67,7 @@ const ClientesPage = () => {
   } else {
     await createCliente(data);
   }
-};
+};*/
 
 const createCliente = async (data: z.infer<typeof formSchema>) => {
     const response = await fetch('http://localhost:3000/clientes', {
@@ -88,14 +88,14 @@ const createCliente = async (data: z.infer<typeof formSchema>) => {
   };
   
   const updateCliente = async (data: z.infer<typeof formSchema> & { id: number }) => {
-    const { id, ...dataWithoutId } = data; // Remove o campo id
+    const { id, ...dataWithoutId } = data;
     
     const response = await fetch(`http://localhost:3000/clientes/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataWithoutId), // Envia apenas os dados sem o id
+        body: JSON.stringify(dataWithoutId),
     });
 
     const responseText = await response.text();
@@ -105,7 +105,7 @@ const createCliente = async (data: z.infer<typeof formSchema>) => {
         throw new Error('Erro ao atualizar cliente: ' + responseText);
     }
 
-    return JSON.parse(responseText); // Analisa a resposta como JSON
+    return JSON.parse(responseText);
 };
 
 

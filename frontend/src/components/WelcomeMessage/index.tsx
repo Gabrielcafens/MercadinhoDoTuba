@@ -37,7 +37,7 @@ const WelcomeMessage = () => {
             <strong>Em desenvolvimento:</strong> Produtos e Estoque.
           </p>
           <p className="mb-4">
-            Para usar a lista de compras, selecione o cliente e os produtos. Altere a quantidade e finalize o pedido. Após a finalização, você pode alterar o status de "pendente" para "entregue".
+            Para usar a lista de compras, selecione o cliente e os produtos. Altere a quantidade e finalize o pedido. Após a finalização, você pode alterar o status de &quot;pendente&quot; para &quot;entregue&quot;.
           </p>
           <Button variant="default" onClick={handleClose} className="mt-4 bg-primary-6 text-neutral-0">
             Fechar
