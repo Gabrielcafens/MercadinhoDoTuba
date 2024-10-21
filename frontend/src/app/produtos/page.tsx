@@ -1,4 +1,4 @@
-'use client';
+/*'use client';
 
 import ProdutoForm from '@/components/ProdutoForm';
 import React, { useEffect, useState } from 'react';
@@ -88,4 +88,4 @@ const handleEditProduto = (produto: Produto) => {
   );
 };
 
-export default ProdutosPage;
+export default ProdutosPage;*/
