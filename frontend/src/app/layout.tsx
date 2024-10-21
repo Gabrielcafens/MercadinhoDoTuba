@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import HamburgerMenu from '../components/HamburguerMenu';
 import './globals.css';
 
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
