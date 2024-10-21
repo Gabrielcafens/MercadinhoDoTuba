@@ -1,87 +1,127 @@
-import React, { useEffect, useState } from 'react';
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+export const formSchema = z.object({
+  nome: z.string().min(2, {
+    message: "O nome deve ter pelo menos 2 caracteres.",
+  }),
+  endereco: z.string().min(5, {
+    message: "O endereço deve ter pelo menos 5 caracteres.",
+  }),
+  telefone: z.string().min(10, {
+    message: "O telefone deve ter pelo menos 10 caracteres.",
+  }),
+});
 
 interface EstoqueFormProps {
-  estoque?: { id: number; produto_id: number; quantidade_atual: number };
-  produtos: { id: number; nome: string }[];
+  estoque?: {
+    id?: number;
+    nome: string;
+    endereco: string;
+    telefone: string;
+  };
   onClose: () => void;
+  onSubmit: (data: z.infer<typeof formSchema> & { id?: number }) => Promise<void>;
   onSave: () => void;
 }
 
-const EstoqueForm: React.FC<EstoqueFormProps> = ({ estoque, produtos, onClose, onSave }) => {
-  const [formData, setFormData] = useState<{
-    produto_id: number | string;
-    quantidade_atual: number;
-  }>({
-    produto_id: '',
-    quantidade_atual: 0,
+export function EstoqueForm({ estoque, onClose, onSubmit }: EstoqueFormProps) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      nome: estoque?.nome || "",
+      endereco: estoque?.endereco || "",
+      telefone: estoque?.telefone || "",
+    },
   });
 
-  useEffect(() => {
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     if (estoque) {
-      setFormData({
-        produto_id: estoque.produto_id,
-        quantidade_atual: estoque.quantidade_atual,
+      await onSubmit({ ...data, id: estoque.id });
+    } else {
+      const response = await fetch('http://localhost:3000/estoque', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       });
-    }
-  }, [estoque]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: name === 'quantidade_atual' ? Number(value) : value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    try {
-      const method = estoque ? 'PUT' : 'POST';
-      const url = estoque ? `http://localhost:3000/estoque/${estoque.id}` : 'http://localhost:3000/estoque';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao salvar o estoque');
+  
+      if (response.ok) {
+        const newEstoque = await response.json();
+        console.log('Estoque criado:', newEstoque);
+        onSubmit(newEstoque);
+      } else {
+        console.error('Erro ao criar estoque:', response.status);
       }
-
-      onSave();
-    } catch (error: any) {
-      console.error(error);
-      alert(error.message);
     }
+    onClose();
   };
 
   return (
-    <div>
-      <h2>{estoque ? 'Editar Estoque' : 'Adicionar Estoque'}</h2>
-      <form onSubmit={handleSubmit}>
-        <select
-          name="produto_id"
-          value={formData.produto_id}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Selecionar Produto</option>
-          {produtos.map(produto => (
-            <option key={produto.id} value={produto.id}>{produto.nome}</option>
-          ))}
-        </select>
-        <input
-          type="number"
-          name="quantidade_atual"
-          value={formData.quantidade_atual}
-          onChange={handleChange}
-          placeholder="Quantidade Atual"
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="nome"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nome</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o nome" {...field} />
+              </FormControl>
+              <FormDescription>Informe o nome do estoque.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <button type="submit">{estoque ? 'Atualizar' : 'Adicionar'}</button>
-        <button type="button" onClick={onClose}>Cancelar</button>
+        <FormField
+          control={form.control}
+          name="endereco"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Endereço</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o endereço" {...field} />
+              </FormControl>
+              <FormDescription>Informe o endereço do estoque.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="telefone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telefone</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o telefone" {...field} />
+              </FormControl>
+              <FormDescription>Informe o telefone do estoque.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="flex justify-between mt-4">
+        <Button type="button"className="bg-red-500 text-neutral-0 hover:bg-red-600" onClick={onClose}>Cancelar</Button>
+        <Button  type="submit" className="bg-primary-4 text-neutral-0 hover:bg-primary-5 hover:text-neutral-1" >Confirmar</Button>
+        </div>      
       </form>
-    </div>
+    </Form>
   );
-};
-
-export default EstoqueForm;
+}

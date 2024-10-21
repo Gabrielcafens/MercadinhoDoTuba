@@ -1,3 +1,5 @@
+'use client';
+
 import ProdutoForm from '@/components/ProdutoForm';
 import React, { useEffect, useState } from 'react';
 

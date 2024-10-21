@@ -14,7 +14,6 @@ interface Produto {
   unidade: string; 
 }
 
-
 interface Categoria {
   id: string;
   nome: string;
@@ -219,7 +218,7 @@ const ShoppingList = () => {
           setClienteSelecionado(cliente);
         }} />
       </div>
-      <div className="flex justify-between mt-4 bg-primary-1">
+      <div className="flex flex-col md:flex-row justify-between mt-2 bg-primary-1">
         <input
           type="text"
           placeholder="Buscar produto..."
@@ -228,24 +227,25 @@ const ShoppingList = () => {
             setSearchTerm(e.target.value);
             console.log("Search term updated:", e.target.value);
           }}
-          className="border-primary-6 p-2  bg-neutral-0 text-neutral-1"
-          />
+          className="border-primary-6 p-2 bg-neutral-0 mb-2 text-neutral-1 w-full md:w-1/2 md:mr-2" 
+        />
         <select
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              console.log("Category selected:", e.target.value);
-            }}
-            >
-            <option value="">Todas as categorias</option>
-            {categorias.map((categoria) => (
-              <option key={categoria.id} value={categoria.nome}>
-                {categoria.nome}
-              </option>
-            ))}
-          </select>
-
+          value={selectedCategory}
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            console.log("Category selected:", e.target.value);
+          }}
+          className="w-full md:w-auto" 
+        >
+          <option value="">Todas as categorias</option>
+          {categorias.map((categoria) => (
+            <option key={categoria.id} value={categoria.nome}>
+              {categoria.nome}
+            </option>
+          ))}
+        </select>
       </div>
+
 
       <Table className="bg-primary-1">
         <TableHeader>
